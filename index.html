@@ -14,6 +14,11 @@
   body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif; min-height:100vh; overflow-x:hidden; }
   body::before { content:''; position:fixed; inset:0; background:radial-gradient(ellipse 600px 400px at 80% 20%,rgba(0,212,170,.07) 0%,transparent 70%),radial-gradient(ellipse 500px 300px at 10% 80%,rgba(255,107,107,.05) 0%,transparent 70%); pointer-events:none; z-index:0; }
 
+  /* تنسيق شريط ترجمة جوجل ليكون مخفياً وجميلاً */
+  #google_translate_element { position: absolute; top: -100px; }
+  .goog-te-banner-frame.skiptranslate { display: none !important; }
+  body { top: 0px !important; }
+
   .wrap { max-width:960px; margin:0 auto; padding:2rem 1.5rem; position:relative; z-index:1; }
 
   /* Header */
@@ -128,6 +133,9 @@
 </style>
 </head>
 <body>
+
+<div id="google_translate_element"></div>
+
 <div class="wrap">
 
   <div class="header">
@@ -224,6 +232,13 @@
     </div>
   </div>
 </div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'ar', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <script>
 let player = null;
@@ -387,7 +402,7 @@ function renderLines() {
   `).join('');
 }
 
-// ─── الترجمة المحسنة ───
+// ─── الترجمة المحسنة (باستخدام جوجل) ───
 async function translateAll() {
   const btn = document.getElementById('trBtn');
   if (btn.disabled) return;
@@ -396,25 +411,28 @@ async function translateAll() {
   hideErr();
 
   try {
-    for (let i = 0; i < lines.length; i++) {
-      if (!lines[i].ar) {
-        const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(lines[i].en)}&langpair=en|ar`);
-        const data = await response.json();
-        if (data.responseData) {
-          lines[i].ar = data.responseData.translatedText;
-          const el = document.querySelector(`#tline-${i} .t-ar`);
-          if (el) el.textContent = lines[i].ar;
-        }
-        btn.textContent = `⏳ جاري الترجمة (${i+1}/${lines.length})`;
-        await new Promise(r => setTimeout(r, 50)); 
-      }
+    // استدعاء نافذة جوجل للترجمة برمجياً
+    const select = document.querySelector('.goog-te-combo');
+    if (select) {
+      select.value = 'ar';
+      select.dispatchEvent(new Event('change'));
     }
+
+    // محاكاة الترجمة داخل العناصر
+    for (let i = 0; i < lines.length; i++) {
+        const elAr = document.querySelector(`#tline-${i} .t-ar`);
+        if (elAr) {
+          elAr.textContent = lines[i].en; // سنضع النص الإنجليزي وجوجل سيترجمه فوراً
+        }
+    }
+
     document.getElementById('arToggle').checked = true;
     document.getElementById('trBody').classList.add('show-ar');
+    
     btn.textContent = '✓ تمت الترجمة';
-    setTimeout(() => { btn.disabled = false; btn.textContent = '🌍 ترجم بالعربي'; }, 3000);
+    setTimeout(() => { btn.disabled = false; btn.textContent = '🌍 ترجم بالعربي'; }, 2000);
   } catch (err) {
-    showErr('حدث خطأ في الترجمة');
+    showErr('تأكد من اختيار اللغة العربية من شريط جوجل بالأعلى');
     btn.disabled = false;
     btn.textContent = '🌍 ترجم بالعربي';
   }
