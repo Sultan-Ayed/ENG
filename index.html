@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shadow English — تعلم بالشادوينج</title>
+<title>Shadow English — الترجمة المزدوجة</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -12,9 +12,8 @@
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif; min-height:100vh; overflow-x:hidden; }
-  body::before { content:''; position:fixed; inset:0; background:radial-gradient(ellipse 600px 400px at 80% 20%,rgba(0,212,170,.07) 0%,transparent 70%),radial-gradient(ellipse 500px 300px at 10% 80%,rgba(255,107,107,.05) 0%,transparent 70%); pointer-events:none; z-index:0; }
-
-  /* تنسيق محرك جوجل ليبقى مخفياً ويعمل في الخلفية */
+  
+  /* إخفاء شريط جوجل العلوي */
   #google_translate_element { display: none !important; }
   .goog-te-banner-frame.skiptranslate { display: none !important; }
   body { top: 0px !important; }
@@ -22,58 +21,49 @@
   .wrap { max-width:960px; margin:0 auto; padding:2rem 1.5rem; position:relative; z-index:1; }
 
   /* Header */
-  .header { text-align:center; margin-bottom:2.5rem; animation:fadeDown .7s ease; }
+  .header { text-align:center; margin-bottom:2.5rem; }
   .badge { display:inline-block; background:rgba(0,212,170,.12); border:1px solid rgba(0,212,170,.35); color:var(--accent); font-size:.72rem; letter-spacing:3px; text-transform:uppercase; padding:.35rem 1.1rem; border-radius:100px; margin-bottom:.9rem; font-family:'Space Mono',monospace; }
-  .header h1 { font-size:clamp(2rem,5vw,3rem); font-weight:900; line-height:1.1; }
+  .header h1 { font-size:clamp(2rem,5vw,3rem); font-weight:900; line-height:1.1; color: #fff; }
   .header h1 span { color:var(--accent); }
-  .header p { color:var(--muted); font-size:1rem; margin-top:.5rem; }
-  .dedication { display:inline-flex; align-items:center; gap:.6rem; margin-top:1.2rem; background:rgba(0,212,170,.06); border:1px solid rgba(0,212,170,.2); border-radius:100px; padding:.5rem 1.2rem; flex-wrap:wrap; justify-content:center; }
-  .ded-name  { font-size:.95rem; font-weight:700; }
-  .ded-link  { font-size:.82rem; color:var(--accent); text-decoration:none; border:1px solid rgba(0,212,170,.35); border-radius:100px; padding:.2rem .8rem; font-family:'Space Mono',monospace; }
 
-  /* Card & Layout */
-  .card { background:var(--card); border:1px solid var(--border); border-radius:20px; margin-bottom:1.5rem; overflow:hidden; animation:fadeUp .6s ease .2s both; }
-  .card-head { padding:.9rem 1.4rem; border-bottom:1px solid var(--border); background:rgba(0,0,0,.18); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.8rem; }
+  /* Card */
+  .card { background:var(--card); border:1px solid var(--border); border-radius:20px; margin-bottom:1.5rem; overflow:hidden; }
+  .card-head { padding:.9rem 1.4rem; border-bottom:1px solid var(--border); background:rgba(0,0,0,.18); display:flex; align-items:center; justify-content:space-between; }
   .card-title { font-size:.8rem; color:var(--muted); letter-spacing:2px; text-transform:uppercase; font-family:'Space Mono',monospace; }
-  .card-body  { padding:1.3rem; }
+  
+  /* Inputs */
+  .url-input, .tr-input { background:var(--bg); border:2px solid var(--border); border-radius:12px; padding:.85rem 1.1rem; color:var(--text); width:100%; outline:none; font-family:'Space Mono',monospace; direction:ltr; }
+  .tr-input { margin-top: 1rem; min-height:150px; }
 
   /* Buttons */
-  .btn { background:var(--accent); color:#000; border:none; border-radius:12px; padding:.85rem 1.7rem; font-size:.93rem; font-weight:700; cursor:pointer; transition:all .18s; }
-  .btn:hover { background:#00f0c0; transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,212,170,.35); }
+  .btn { background:var(--accent); color:#000; border:none; border-radius:12px; padding:.85rem 1.7rem; font-size:.93rem; font-weight:700; cursor:pointer; }
   .btn-sm { background:var(--accent); color:#000; border:none; border-radius:9px; padding:.4rem 1rem; font-size:.82rem; font-weight:700; cursor:pointer; }
-  .btn-outline { background:transparent; color:var(--accent); border:1px solid var(--accent); border-radius:12px; padding:.85rem 1.7rem; font-size:.93rem; font-weight:700; cursor:pointer; }
 
-  /* Inputs */
-  .url-input, .tr-input {
-    background:var(--bg); border:2px solid var(--border); border-radius:12px; padding:.85rem 1.1rem; color:var(--text); outline:none; font-family:'Space Mono',monospace; direction:ltr; width:100%;
-  }
-  .tr-input { resize:vertical; min-height:160px; margin-top: 1rem; }
-
-  /* Player & Controls */
+  /* Video Wrap */
   .video-wrap { position:relative; width:100%; padding-top:56.25%; background:#000; }
   .video-wrap iframe { position:absolute; inset:0; width:100%; height:100%; border:none; }
-  .controls-bar { padding:.9rem 1.4rem; display:flex; align-items:center; gap:1.3rem; flex-wrap:wrap; border-top:1px solid var(--border); background:rgba(0,0,0,.18); }
+
+  /* Transcript Style - Dual Language */
+  .tr-body { padding:.9rem; max-height:500px; overflow-y:auto; }
+  .t-line { display:flex; gap:.7rem; padding:1rem; border-radius:11px; cursor:pointer; margin-bottom:.5rem; border:1px solid transparent; align-items:flex-start; transition: 0.2s; }
+  .t-line:hover { background:rgba(255,255,255,0.03); }
+  .t-line.active { background:rgba(0,212,170,0.1); border-color:rgba(0,212,170,0.3); }
+
+  .t-time { font-size:.75rem; color:var(--accent); font-family:'Space Mono',monospace; min-width:45px; }
+  .content-box { flex: 1; display: flex; flex-direction: column; gap: 5px; }
   
-  .speed-btn { background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:.3rem .65rem; font-size:.78rem; cursor:pointer; }
-  .speed-btn.active { background:var(--accent); color:#000; font-weight:700; }
-
-  /* Transcript Lines */
-  .tr-body { padding:.9rem; max-height:440px; overflow-y:auto; }
-  .t-line { display:flex; gap:.7rem; padding:.75rem .85rem; border-radius:11px; cursor:pointer; margin-bottom:.18rem; border:1px solid transparent; align-items:flex-start; }
-  .t-line:hover { background:rgba(0,212,170,.05); }
-  .t-line.active { background:rgba(0,212,170,.11); border-color:rgba(0,212,170,.42); }
-
-  .t-time { font-size:.7rem; color:var(--accent); font-family:'Space Mono',monospace; min-width:40px; margin-top:3px; }
-  .t-en { font-size:.94rem; color:var(--text); line-height:1.55; direction:ltr; text-align:left; flex: 1; }
-  .t-ar { font-size:.88rem; color:var(--muted); margin-top:.28rem; direction:rtl; text-align:right; display:none; }
+  /* النص الإنجليزي - يبقى دائماً في الأعلى */
+  .t-en { font-size:1.05rem; color: #fff; font-family:'Space Mono',monospace; direction:ltr; text-align:left; font-weight: 500; }
+  
+  /* النص العربي - يظهر تحت الإنجليزي بلون هادئ */
+  .t-ar { font-size:.95rem; color:var(--muted); direction:rtl; text-align:right; display:none; padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.05); }
+  
   .show-ar .t-ar { display:block; }
 
-  .rep-btn { background:none; border:1px solid var(--border); color:var(--muted); border-radius:7px; width:27px; height:27px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .rep-btn { background:none; border:1px solid var(--border); color:var(--muted); border-radius:7px; width:30px; height:30px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
   .rep-btn.on { border-color:var(--gold); color:var(--gold); background:rgba(255,217,61,.1); }
 
   .hidden { display:none; }
-  @keyframes fadeDown { from{opacity:0;transform:translateY(-18px)} to{opacity:1;transform:translateY(0)} }
-  @keyframes fadeUp   { from{opacity:0;transform:translateY(18px)}  to{opacity:1;transform:translateY(0)} }
 </style>
 </head>
 <body>
@@ -84,22 +74,16 @@
   <div class="header">
     <div class="badge">🎧 Shadowing Method</div>
     <h1>تعلم الإنجليزية<br><span>بالشادوينج</span></h1>
-    <p>ترجمة فورية من الإنجليزية إلى العربية</p>
-    <div class="dedication">
-      <span style="color:var(--muted); font-size:0.8rem">إهداء من</span>
-      <strong class="ded-name">م.سلطان بن عايد</strong>
-      <a href="https://sultan-ayed.github.io/my/" target="_blank" class="ded-link">🌐 الموقع</a>
-    </div>
   </div>
 
   <div id="setupSection">
     <div class="card">
-      <div class="card-head"><span class="card-title">📺 إعداد الفيديو</span></div>
-      <div class="card-body">
-        <input type="text" class="url-input" id="videoUrl" placeholder="رابط يوتيوب هنا...">
-        <textarea class="tr-input" id="trInput" placeholder="الصق الترانسكريبت هنا..."></textarea>
+      <div class="card-head"><span class="card-title">📺 إعداد الجلسة</span></div>
+      <div class="card-body" style="padding:1.3rem;">
+        <input type="text" class="url-input" id="videoUrl" placeholder="أدخل رابط اليوتيوب...">
+        <textarea class="tr-input" id="trInput" placeholder="أدخل النص (Transcript) هنا..."></textarea>
         <div style="margin-top:1.5rem; text-align:left;">
-          <button class="btn" onclick="startSession()">ابدأ التدريب ▶</button>
+          <button class="btn" onclick="startSession()">ابدأ الآن ▶</button>
         </div>
       </div>
     </div>
@@ -107,23 +91,13 @@
 
   <div id="playerSection" class="hidden">
     <div class="card">
-      <div class="card-head">
-        <span class="card-title">🎬 المشغل</span>
-        <button class="btn-sm" onclick="location.reload()">فيديو جديد</button>
-      </div>
       <div class="video-wrap"><div id="ytContainer"></div></div>
-      <div class="controls-bar">
-        <span style="font-size:0.75rem">السرعة:</span>
-        <button class="speed-btn" onclick="setSpeed(0.75,this)">0.75×</button>
-        <button class="speed-btn active" onclick="setSpeed(1,this)">1×</button>
-        <button class="speed-btn" onclick="setSpeed(1.25,this)">1.25×</button>
-      </div>
     </div>
 
     <div class="card">
       <div class="card-head">
         <span class="card-title">📄 النص والترجمة</span>
-        <button class="btn-sm" id="trBtn" onclick="translateToAr()">🌍 ترجم للعربية</button>
+        <button class="btn-sm" id="trBtn" onclick="toggleTranslation()">🌍 ترجم للعربية</button>
       </div>
       <div class="tr-body" id="trBody"></div>
     </div>
@@ -131,22 +105,14 @@
 </div>
 
 <script type="text/javascript">
-// استدعاء محرك جوجل
 function googleTranslateElementInit() {
-  new google.translate.TranslateElement({
-    pageLanguage: 'en', 
-    includedLanguages: 'ar', 
-    autoDisplay: false
-  }, 'google_translate_element');
+  new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'ar', autoDisplay: false}, 'google_translate_element');
 }
 </script>
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <script>
-let player = null;
-let lines = [];
-let loopIdx = null;
-let tracker = null;
+let player, lines = [], loopIdx = null;
 
 function getYTId(url) {
   const m = url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
@@ -181,10 +147,10 @@ function startSession() {
   const url = document.getElementById('videoUrl').value;
   const raw = document.getElementById('trInput').value;
   const ytId = getYTId(url);
-  if (!ytId || !raw) return alert("الرجاء إدخال الرابط والنص");
+  if (!ytId || !raw) return alert("الرجاء تعبئة الرابط والنص");
   lines = parseTranscript(raw);
-  document.getElementById('setupSection').classList.add('hidden');
-  document.getElementById('playerSection').classList.remove('hidden');
+  document.getElementById('setupSection').className = 'hidden';
+  document.getElementById('playerSection').className = '';
   renderLines();
   loadYT(ytId);
 }
@@ -196,46 +162,44 @@ function loadYT(id) {
   window.onYouTubeIframeAPIReady = () => {
     player = new YT.Player('ytContainer', {
       videoId: id,
-      events: { onReady: () => { startTracker(); } }
+      events: { onReady: () => {
+        setInterval(() => {
+          const t = player.getCurrentTime();
+          let ai = 0;
+          lines.forEach((l, i) => { if (t >= l.time) ai = i; });
+          document.querySelectorAll('.t-line').forEach((el, i) => el.classList.toggle('active', i === ai));
+          if (loopIdx !== null) {
+            const end = lines[loopIdx+1] ? lines[loopIdx+1].time : lines[loopIdx].time + 5;
+            if (t >= end) player.seekTo(lines[loopIdx].time);
+          }
+        }, 400);
+      }}
     });
   };
 }
 
-function startTracker() {
-  tracker = setInterval(() => {
-    const t = player.getCurrentTime();
-    let ai = 0;
-    lines.forEach((l, i) => { if (t >= l.time) ai = i; });
-    document.querySelectorAll('.t-line').forEach((el, i) => el.classList.toggle('active', i === ai));
-    if (loopIdx !== null) {
-      const end = lines[loopIdx+1] ? lines[loopIdx+1].time : lines[loopIdx].time + 5;
-      if (t >= end) player.seekTo(lines[loopIdx].time);
-    }
-  }, 400);
-}
-
-// تعديل وظيفة الترجمة لتعمل عبر جوجل
-function translateToAr() {
+// الوظيفة الأساسية: ترجمة مع الحفاظ على النص الأصلي
+function toggleTranslation() {
+  const trBody = document.getElementById('trBody');
   const btn = document.getElementById('trBtn');
-  btn.textContent = "⏳ جاري الترجمة...";
   
-  // تفعيل ترجمة جوجل برمجياً
-  const googleCombo = document.querySelector('.goog-te-combo');
-  if (googleCombo) {
-    googleCombo.value = 'ar';
-    googleCombo.dispatchEvent(new Event('change'));
+  if (trBody.classList.contains('show-ar')) {
+    trBody.classList.remove('show-ar');
+    btn.textContent = "🌍 ترجم للعربية";
+  } else {
+    // تفعيل جوجل
+    const combo = document.querySelector('.goog-te-combo');
+    if (combo) { combo.value = 'ar'; combo.dispatchEvent(new Event('change')); }
+    
+    // وضع النص الإنجليزي في خانة العربي ليتم ترجمته تلقائياً بواسطة جوجل
+    lines.forEach((l, i) => {
+      const arEl = document.getElementById(`ar-${i}`);
+      if (arEl) arEl.textContent = l.en;
+    });
+    
+    trBody.classList.add('show-ar');
+    btn.textContent = "📄 إخفاء الترجمة";
   }
-
-  // إظهار نصوص الترجمة العربية (التي سيقوم جوجل بترجمتها داخل الصفحة)
-  lines.forEach((line, i) => {
-    const arEl = document.getElementById(`ar-${i}`);
-    if (arEl) {
-      arEl.textContent = line.en; // نضع النص الإنجليزي وجوجل سيحوله لعربي
-    }
-  });
-
-  document.getElementById('trBody').classList.add('show-ar');
-  setTimeout(() => { btn.textContent = "✓ تمت الترجمة"; }, 2000);
 }
 
 function renderLines() {
@@ -243,19 +207,13 @@ function renderLines() {
   body.innerHTML = lines.map((l, i) => `
     <div class="t-line" onclick="player.seekTo(${l.time})">
       <span class="t-time">${Math.floor(l.time/60)}:${Math.floor(l.time%60).toString().padStart(2,'0')}</span>
-      <div style="flex:1">
+      <div class="content-box">
         <div class="t-en">${l.en}</div>
         <div class="t-ar" id="ar-${i}"></div>
       </div>
       <button class="rep-btn" onclick="event.stopPropagation(); loopIdx=(loopIdx===${i}?null:${i}); this.classList.toggle('on')">🔁</button>
     </div>
   `).join('');
-}
-
-function setSpeed(s, btn) {
-  player.setPlaybackRate(s);
-  document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
 }
 </script>
 </body>
