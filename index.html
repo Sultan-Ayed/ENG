@@ -137,8 +137,42 @@
   @keyframes fadeDown { from{opacity:0;transform:translateY(-18px)} to{opacity:1;transform:translateY(0)} }
   @keyframes fadeUp   { from{opacity:0;transform:translateY(18px)}  to{opacity:1;transform:translateY(0)} }
   @keyframes pulse    { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.6)} }
+  @keyframes modalIn  { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
 
-  @media(max-width:640px) { .steps{flex-direction:column} .url-row{flex-direction:column} .controls-bar{gap:.8rem} }
+  /* ── Help Modal ── */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:1000; display:flex; align-items:center; justify-content:center; padding:1rem; backdrop-filter:blur(4px); }
+  .modal-overlay.hidden { display:none; }
+  .modal-box { background:#111827; border:1px solid var(--border); border-radius:24px; width:100%; max-width:680px; max-height:90vh; overflow-y:auto; animation:modalIn .25s ease; }
+  .modal-box::-webkit-scrollbar { width:5px; }
+  .modal-box::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+  .modal-head { padding:1.3rem 1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:#111827; z-index:1; }
+  .modal-title { font-size:1.1rem; font-weight:700; }
+  .modal-close { background:none; border:1px solid var(--border); color:var(--muted); border-radius:8px; width:32px; height:32px; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+  .modal-close:hover { border-color:var(--accent2,#ff6b6b); color:var(--accent2,#ff6b6b); }
+  .modal-body { padding:1.5rem; }
+
+  /* Steps inside modal */
+  .guide-step { display:flex; gap:1.2rem; margin-bottom:1.8rem; align-items:flex-start; }
+  .guide-num { width:36px; height:36px; background:rgba(0,212,170,.15); border:2px solid var(--accent); color:var(--accent); border-radius:50%; font-size:1rem; font-weight:900; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Space Mono',monospace; }
+  .guide-content h3 { font-size:1rem; font-weight:700; margin-bottom:.4rem; }
+  .guide-content p  { font-size:.88rem; color:var(--muted); line-height:1.7; }
+  .guide-content .tip { background:rgba(0,212,170,.06); border:1px solid rgba(0,212,170,.2); border-radius:10px; padding:.6rem .9rem; margin-top:.6rem; font-size:.82rem; color:var(--accent); }
+  .guide-img { width:100%; border-radius:12px; border:1px solid var(--border); margin-top:.8rem; background:var(--card); overflow:hidden; }
+  .guide-img-inner { padding:1rem; font-family:'Space Mono',monospace; font-size:.78rem; direction:ltr; }
+  /* Simulated UI screenshot */
+  .sim-bar { display:flex; gap:.5rem; padding:.5rem .7rem; background:rgba(0,0,0,.3); border-radius:8px; align-items:center; margin-bottom:.5rem; }
+  .sim-input { flex:1; background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:6px; padding:.35rem .7rem; color:var(--muted); font-size:.75rem; font-family:'Space Mono',monospace; direction:ltr; }
+  .sim-btn { background:var(--accent); color:#000; border:none; border-radius:6px; padding:.35rem .8rem; font-size:.75rem; font-weight:700; font-family:'Tajawal',sans-serif; }
+  .sim-line { display:flex; gap:.6rem; padding:.4rem .6rem; border-radius:7px; align-items:center; font-size:.75rem; }
+  .sim-line.hl { background:rgba(0,212,170,.12); border:1px solid rgba(0,212,170,.3); }
+  .sim-time { color:var(--accent); min-width:35px; font-family:'Space Mono',monospace; }
+  .sim-text { color:var(--text); font-family:'Space Mono',monospace; }
+  .sim-ar   { color:var(--muted); font-family:'Tajawal',sans-serif; font-size:.8rem; }
+  .sim-icons { display:flex; gap:.3rem; margin-right:auto; }
+  .sim-icon { width:20px; height:20px; border:1px solid var(--border); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:.65rem; }
+  .sim-icon.gold { border-color:#f9ca24; color:#f9ca24; }
+
+  @media(max-width:640px) { .steps{flex-direction:column} .url-row{flex-direction:column} .controls-bar{gap:.8rem} .guide-step{flex-direction:column} }
 </style>
 </head>
 <body>
@@ -149,9 +183,12 @@
     <div class="badge">🎧 Shadowing Method</div>
     <h1>تعلم الإنجليزية<br><span>بالشادوينج</span></h1>
     <p>قلّد النطق سطر بسطر — الطريقة الأسرع لتحسين اللغة</p>
+    <button onclick="openHelp()" style="margin-top:1rem;background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.35);color:#00d4aa;border-radius:100px;padding:.45rem 1.3rem;font-size:.85rem;font-family:'Tajawal',sans-serif;cursor:pointer;">
+      ❓ كيف أستخدم الموقع؟
+    </button>
     <div class="dedication">
       <span class="ded-label">إهداء من</span>
-      <strong class="ded-name">سلطان بن عايد</strong>
+      <strong class="ded-name">م.سلطان بن عايد</strong>
       <a href="https://sultan-ayed.github.io/my/" target="_blank" class="ded-link">🌐 زيارة الموقع</a>
     </div>
   </div>
@@ -258,6 +295,106 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ── Help Modal ── -->
+<div class="modal-overlay hidden" id="helpModal" onclick="closeHelpOutside(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="modal-title">📖 كيف تستخدم Shadow English؟</span>
+      <button class="modal-close" onclick="closeHelp()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Step 1 -->
+      <div class="guide-step">
+        <div class="guide-num">١</div>
+        <div class="guide-content">
+          <h3>افتح الفيديو في يوتيوب وانسخ الترانسكريبت</h3>
+          <p>افتح أي فيديو إنجليزي على يوتيوب في متصفحك، اضغط على <strong style="color:var(--accent)">⋯ (ثلاث نقاط)</strong> تحت الفيديو، اختر <strong style="color:var(--accent)">"Show transcript"</strong>، ثم حدد كل النص <strong style="color:var(--accent)">(Ctrl+A)</strong> وانسخه <strong style="color:var(--accent)">(Ctrl+C)</strong>.</p>
+          <div class="tip">💡 تأكد إن التوقيتات ظاهرة في الترانسكريبت قبل ما تنسخ</div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="guide-step">
+        <div class="guide-num">٢</div>
+        <div class="guide-content">
+          <h3>حط رابط الفيديو والصق الترانسكريبت</h3>
+          <p>ارجع للموقع، حط رابط الفيديو في الخانة الأولى، والصق الترانسكريبت في الخانة الثانية، ثم اضغط <strong style="color:var(--accent)">ابدأ الجلسة ▶</strong>.</p>
+          <div class="guide-img">
+            <div class="guide-img-inner">
+              <div class="sim-bar">
+                <div class="sim-input">https://www.youtube.com/watch?v=...</div>
+                <div class="sim-btn">ابدأ الجلسة ▶</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="guide-step">
+        <div class="guide-num">٣</div>
+        <div class="guide-content">
+          <h3>ابدأ الشادوينج مع المشغل</h3>
+          <p>الفيديو يشتغل والنص يتتبع تلقائياً. اضغط على أي سطر للانتقال إليه مباشرة في الفيديو.</p>
+          <div class="guide-img">
+            <div class="guide-img-inner">
+              <div class="sim-line hl">
+                <span class="sim-time">0:03</span>
+                <div><div class="sim-text">Self-confidence is the belief</div></div>
+                <div class="sim-icons">
+                  <div class="sim-icon">🔁</div>
+                  <div class="sim-icon gold">⭐</div>
+                </div>
+              </div>
+              <div class="sim-line">
+                <span class="sim-time">0:06</span>
+                <div><div class="sim-text">in your own abilities and judgment</div></div>
+                <div class="sim-icons">
+                  <div class="sim-icon">🔁</div>
+                  <div class="sim-icon">⭐</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="guide-step">
+        <div class="guide-num">٤</div>
+        <div class="guide-content">
+          <h3>استخدم أدوات الشادوينج</h3>
+          <p>عندك ٣ أدوات مهمة لكل سطر:</p>
+          <p style="margin-top:.6rem">
+            <strong style="color:var(--gold)">🔁 تكرار</strong> — يكرر السطر بشكل تلقائي حتى تتقنه<br>
+            <strong style="color:#f9ca24">⭐ مفضلة</strong> — يحفظ الجملة في قائمة "المفضلة" للمراجعة<br>
+            <strong style="color:var(--accent)">🌍 ترجم</strong> — يترجم كل السطور للعربي دفعة وحدة
+          </p>
+          <div class="tip">💡 قلّل السرعة لـ 0.75× أو 0.5× في البداية حتى تعتاد على النطق</div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="guide-step">
+        <div class="guide-num">٥</div>
+        <div class="guide-content">
+          <h3>طريقة الشادوينج الصحيحة</h3>
+          <p>
+            ١. <strong>استمع</strong> للسطر كاملاً بدون ما تقلد<br>
+            ٢. <strong>كرره</strong> بنفس الإيقاع والنبرة بصوت عالي<br>
+            ٣. <strong>قارن</strong> نطقك مع الأصل<br>
+            ٤. <strong>كرر</strong> حتى تحس إن نطقك طبيعي<br>
+            ٥. انتقل للسطر التالي
+          </p>
+          <div class="tip">🎯 التركيز على الإيقاع والتنغيم أهم من النطق الحرفي للكلمات</div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 
@@ -646,6 +783,12 @@ function fmt(s) {
 function esc(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+
+// ─── Help Modal ───────────────────────────────────────────
+function openHelp()  { document.getElementById('helpModal').classList.remove('hidden'); document.body.style.overflow='hidden'; }
+function closeHelp() { document.getElementById('helpModal').classList.add('hidden'); document.body.style.overflow=''; }
+function closeHelpOutside(e) { if (e.target.id==='helpModal') closeHelp(); }
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeHelp(); });
 </script>
 </body>
 </html>
