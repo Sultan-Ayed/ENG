@@ -455,6 +455,7 @@
   }
 
   .show-tr .t-ar { display: block; }
+  .t-ar:empty { display: none !important; }
 
   .rep-btn {
     background: none;
@@ -827,7 +828,14 @@ Let's begin with some basic phrases."></textarea>
   // ── Translation ───────────────────────────────────────
   function toggleTr() {
     const on = document.getElementById('trToggle').checked;
-    document.getElementById('trBody').classList.toggle('show-tr', on);
+    const body = document.getElementById('trBody');
+    body.classList.toggle('show-tr', on);
+    // Also force inline style for already-translated elements
+    body.querySelectorAll('.t-ar').forEach(el => {
+      if (el.textContent.trim()) {
+        el.style.display = on ? 'block' : 'none';
+      }
+    });
   }
 
   async function translateAll() {
@@ -872,14 +880,19 @@ Let's begin with some basic phrases."></textarea>
         if (lines[i]) lines[i].ar = ar || '';
       });
 
+      // Update all .t-ar elements in the DOM
       lines.forEach((line, i) => {
         const arEl = document.querySelector('#tline-' + i + ' .t-ar');
-        if (arEl && line.ar) arEl.textContent = line.ar;
+        if (arEl && line.ar) {
+          arEl.textContent = line.ar;
+          arEl.style.display = 'block'; // force show immediately
+        }
       });
 
+      // Turn on the toggle and apply class
       const toggle = document.getElementById('trToggle');
       toggle.checked = true;
-      toggleTr();
+      document.getElementById('trBody').classList.add('show-tr');
 
       btn.textContent = '✓ تمت الترجمة';
       setTimeout(() => { btn.textContent = '🌍 ترجم بالعربي'; btn.disabled = false; }, 2000);
