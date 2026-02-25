@@ -114,15 +114,6 @@
   .rep-btn:hover { border-color:var(--gold); color:var(--gold); }
   .rep-btn.on { border-color:var(--gold); color:var(--gold); background:rgba(255,217,61,.1); }
 
-  /* API key section */
-  .api-section { background:rgba(0,212,170,.04); border:1px solid rgba(0,212,170,.2); border-radius:14px; padding:1rem 1.2rem; margin-bottom:1rem; }
-  .api-label { font-size:.78rem; color:var(--accent); margin-bottom:.5rem; font-family:'Space Mono',monospace; }
-  .api-row { display:flex; gap:.6rem; flex-wrap:wrap; }
-  .api-input { flex:1; min-width:180px; background:var(--bg); border:2px solid var(--border); border-radius:10px; padding:.6rem .9rem; color:var(--text); font-size:.82rem; font-family:'Space Mono',monospace; direction:ltr; outline:none; }
-  .api-input:focus { border-color:var(--accent); }
-  .api-note { font-size:.74rem; color:var(--muted); margin-top:.5rem; line-height:1.6; }
-  .api-note a { color:var(--accent); }
-
   /* Error box */
   .err-box { margin:.8rem 1.4rem; background:rgba(225,112,85,.1); border:1px solid rgba(225,112,85,.3); border-radius:10px; padding:.7rem 1rem; font-size:.8rem; color:#e17055; font-family:'Space Mono',monospace; direction:ltr; word-break:break-all; }
 
@@ -160,26 +151,6 @@
 
   <!-- SETUP SECTION -->
   <div id="setupSection">
-
-    <!-- API Key -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-title">🔑 مفتاح الترجمة (Claude API)</span>
-        <span class="pill-ok hidden" id="apiPill">✓ محفوظ</span>
-      </div>
-      <div class="card-body">
-        <div class="api-section">
-          <div class="api-label">أدخل Claude API Key للترجمة التلقائية</div>
-          <div class="api-row">
-            <input type="password" class="api-input" id="apiKeyInput" placeholder="sk-ant-api03-..." oninput="saveApiKey()">
-            <button class="btn-sm" onclick="toggleApiVis()">👁</button>
-          </div>
-          <div class="api-note">
-            احصل على مفتاحك من <a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a> — يُحفظ في المتصفح فقط ولا يُرسل لأي جهة غير Anthropic
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- URL -->
     <div class="card">
@@ -273,32 +244,6 @@ let loopIdx    = null;
 let tracker    = null;
 let curSpeed   = 1;
 let showAr     = false;
-
-// ─── API Key ─────────────────────────────────────────────
-function saveApiKey() {
-  const key = document.getElementById('apiKeyInput').value.trim();
-  localStorage.setItem('claude_api_key', key);
-  const pill = document.getElementById('apiPill');
-  if (key.startsWith('sk-ant-')) {
-    pill.classList.remove('hidden');
-  } else {
-    pill.classList.add('hidden');
-  }
-}
-
-function toggleApiVis() {
-  const inp = document.getElementById('apiKeyInput');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-}
-
-// Load saved key on startup
-window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('claude_api_key');
-  if (saved) {
-    document.getElementById('apiKeyInput').value = saved;
-    saveApiKey();
-  }
-});
 
 // ─── URL helpers ─────────────────────────────────────────
 function getYTId(url) {
@@ -507,70 +452,44 @@ function renderLines() {
   });
 }
 
-// ─── Translation ─────────────────────────────────────────
-async function translateAll() {
-  const apiKey = localStorage.getItem('claude_api_key') || '';
-  if (!apiKey.startsWith('sk-ant-')) {
-    showErr('⚠️ أدخل Claude API Key أولاً في قسم "مفتاح الترجمة" بالأعلى\nاحصل عليه من: console.anthropic.com');
-    document.getElementById('setupSection').classList.remove('hidden');
-    return;
-  }
+// ─── Translation (MyMemory — مجاني بدون حساب) ───────────
+async function translateOne(text) {
+  const url = 'https://api.mymemory.translated.net/get?q='
+    + encodeURIComponent(text) + '&langpair=en|ar';
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  if (data.responseStatus !== 200) throw new Error(data.responseMessage || 'خطأ في الترجمة');
+  return data.responseData.translatedText;
+}
 
+async function translateAll() {
   const btn = document.getElementById('trBtn');
   const untranslated = lines.filter(l => !l.ar);
   if (!untranslated.length) { showArTranslations(); return; }
 
-  btn.disabled=true; btn.textContent='⏳ جاري الترجمة...';
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري الترجمة...';
   hideErr();
 
-  const CHUNK=15;
-  const items = lines.map((l,i)=>({i,en:l.en})).filter(x=>!lines[x.i].ar);
+  const items = lines.map((l, i) => ({ i, en: l.en })).filter(x => !lines[x.i].ar);
+  let done = 0;
 
   try {
-    for (let c=0; c<items.length; c+=CHUNK) {
-      const chunk = items.slice(c, c+CHUNK);
-      const body  = chunk.map((x,j)=>(j+1)+'. '+x.en).join('\n');
-
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version':'2023-06-01',
-          'anthropic-dangerous-direct-browser-access':'true'
-        },
-        body: JSON.stringify({
-          model:'claude-haiku-4-5-20251001',
-          max_tokens:2000,
-          system:'Translate each numbered English sentence to natural Arabic. Reply ONLY with a JSON array of strings in the same order. No markdown, no extra text. Example: ["مرحباً","كيف حالك"]',
-          messages:[{role:'user',content:body}]
-        })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error?.message || 'HTTP '+res.status);
-
-      const raw = (data.content||[]).map(b=>b.text||'').join('').trim();
-      const s=raw.indexOf('['), e=raw.lastIndexOf(']');
-      if (s===-1||e===-1) throw new Error('الرد غير صحيح: '+raw.slice(0,80));
-      const translations = JSON.parse(raw.slice(s,e+1));
-      if (!Array.isArray(translations)) throw new Error('تنسيق خاطئ');
-
-      chunk.forEach((x,j) => { if (lines[x.i] && translations[j]) lines[x.i].ar=translations[j]; });
-
-      const done = lines.filter(l=>l.ar).length;
-      btn.textContent=`⏳ ${done} / ${lines.length}`;
+    for (const item of items) {
+      lines[item.i].ar = await translateOne(lines[item.i].en);
+      done++;
+      btn.textContent = '⏳ ' + done + ' / ' + items.length;
+      await new Promise(r => setTimeout(r, 150));
     }
-
     showArTranslations();
-    btn.textContent='✓ تمت الترجمة';
-    setTimeout(()=>{ btn.textContent='🌍 ترجم بالعربي'; btn.disabled=false; },2500);
-
-  } catch(err) {
-    showErr('❌ '+err.message);
-    showArTranslations(); // show partial if any
-    btn.textContent='❌ أعد المحاولة';
-    btn.disabled=false;
+    btn.textContent = '✓ تمت الترجمة';
+    setTimeout(() => { btn.textContent = '🌍 ترجم بالعربي'; btn.disabled = false; }, 2500);
+  } catch (err) {
+    showErr('❌ ' + err.message);
+    showArTranslations();
+    btn.textContent = '❌ أعد المحاولة';
+    btn.disabled = false;
   }
 }
 
